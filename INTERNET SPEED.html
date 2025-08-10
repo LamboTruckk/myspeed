@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Myspeed — Internet Speed Tester</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Google AdSense (IDs redacted for public) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+    crossorigin="anonymous"
+    data-ad-client="ca-pub-REDACTED"></script>
+
+  <style>
+    :root{
+      --bg:#0b0b0d;
+      --card:#0f1114;
+      --muted:#9aa3b2;
+      --accent:#00ccff;
+      --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(180deg,#050507 0%, #0b0b0d 100%);
+      color:#edf2f8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:20px;
+    }
+
+    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+    header{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+    .logo{
+      width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(59,130,246,0.12)
+    }
+    h1{font-family:'Orbitron',sans-serif;margin:0;font-size:20px;letter-spacing:0.6px}
+    .sub{color:var(--muted);font-size:13px}
+
+    main.card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
+      padding:18px;border-radius:12px;
+    }
+    .controls{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    button{
+      background:var(--accent);
+      color:#001216;border:0;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer;
+      box-shadow:0 8px 24px rgba(0,204,255,0.08);
+    }
+    button.alt{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
+    .stats{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
+    .stat{padding:12px 14px;background:var(--glass);border-radius:10px;min-width:140px}
+    .stat .label{font-size:12px;color:var(--muted)}
+    .stat .value{font-size:20px;font-weight:800;margin-top:6px}
+
+    /* canvas history */
+    .history{margin-top:14px;background:rgba(255,255,255,0.01);padding:12px;border-radius:10px}
+    canvas{width:100%;height:80px;display:block;border-radius:6px}
+
+    /* sidebar */
+    aside.panel{
+      position:relative;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);padding:14px;border-radius:12px;
+      height:fit-content;
+    }
+    .ad-box{border-radius:8px;padding:10px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;margin-bottom:12px;min-height:90px}
+
+    /* Info section */
+    .info{grid-column:1 / -1;margin-top:18px;padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.03)}
+    .info h2{margin-top:0;font-size:16px}
+    .info p{color:var(--muted);margin:8px 0;font-size:14px}
+    .info ul{color:var(--muted);font-size:14px;margin:8px 0 0 18px}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media (max-width:980px){
+      .wrap{grid-template-columns:1fr; padding-bottom:30px}
+      aside.panel{order:2}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo" aria-hidden>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 3v3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><path d="M12 18v3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+      <h1>Myspeed — Speed Tester</h1>
+      <div class="sub">Micro speed checker · dark UI · ads integrated</div>
+    </div>
+  </header>
+
+  <!-- Top banner ad (responsive) -->
+  <div style="max-width:1100px;margin:0 auto 14px; text-align:center;">
+    <!-- AdSense responsive banner (IDs redacted) -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-REDACTED"
+         data-ad-slot="REDACTED"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <div class="wrap">
+    <!-- Main tester area -->
+    <main class="card" id="tester">
+      <div class="controls">
+        <button id="runBtn">Run Test</button>
+        <button id="resetBtn" class="alt">Reset</button>
+        <div style="margin-left:auto;color:var(--muted);font-size:13px">Estimated times may vary — run multiple tests</div>
+      </div>
+
+      <div class="stats" aria-live="polite">
+        <div class="stat">
+          <div class="label">Ping</div>
+          <div id="pingVal" class="value">— ms</div>
+        </div>
+        <div class="stat">
+          <div class="label">Download</div>
+          <div id="dlVal" class="value">— Mbps</div>
+        </div>
+        <div class="stat">
+          <div class="label">Upload</div>
+          <div id="ulVal" class="value">— Mbps</div>
+        </div>
+        <div class="stat" style="min-width:200px">
+          <div class="label">Connection quality</div>
+          <div id="qual" class="value">—</div>
+        </div>
+      </div>
+
+      <div class="history">
+        <div class="label" style="font-size:13px;color:var(--muted)">Download history (last 20)</div>
+        <canvas id="historyCanvas" width="600" height="80"></canvas>
+      </div>
+
+      <div style="margin-top:12px;color:var(--muted);font-size:13px">Tip: for best results, close other apps and devices using the network before testing.</div>
+    </main>
+
+    <!-- Sidebar with ad slots -->
+    <aside class="panel">
+      <div class="ad-box">
+        <!-- Vertical ad unit (IDs redacted) -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-REDACTED"
+             data-ad-slot="REDACTED"
+             data-ad-format="auto"
+             data-full-width-responsive="false"></ins>
+      </div>
+
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">
+        Why we test:
+        <div style="font-size:12px;color:#bcd7e6;margin-top:6px">Download measures streaming & downloads. Upload matters for calls and uploads.</div>
+      </div>
+
+      <div class="ad-box" style="min-height:120px">
+        <!-- small square ad (IDs redacted) -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-REDACTED"
+             data-ad-slot="REDACTED"
+             data-ad-format="auto"></ins>
+      </div>
+
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <!-- Info block spans full width below (move out of grid) -->
+    <section class="info" id="infoBlock" aria-hidden="false">
+      <h2>Understanding your speed</h2>
+      <p><strong>Download (Mbps):</strong> How fast you receive data — higher = smoother streaming and faster downloads.</p>
+      <p><strong>Upload (Mbps):</strong> How fast you send data — important for video calls and uploading files.</p>
+      <p><strong>Ping (ms):</strong> Delay between your device and the server — lower is better for gaming & live conversations.</p>
+      <ul>
+        <li>~5–10 Mbps download: good for a single HD stream</li>
+        <li>~25 Mbps download: good for 4K or multiple users</li>
+        <li>Upload above 3–5 Mbps: decent for video calls</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- Footer Ad -->
+  <div style="max-width:1100px;margin:18px auto 0;text-align:center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-REDACTED"
+         data-ad-slot="REDACTED"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <footer>
+    Made with ♥
+  </footer>
+
+<script>
+/* -------------------------
+  Simple speed test implementation
+  - Download: fetch a big file (CORS enabled)
+  - Upload: POST a blob to httpbin.org (CORS-enabled)
+  - Ping: fetch sequence small image (timing only)
+  Notes: Real-world accuracy depends on endpoints and CORS availability.
+--------------------------*/
+
+const DOWNLOAD_URL = "https://speed.hetzner.de/100MB.bin"; // CORS-enabled file (good for download test)
+const UPLOAD_URL = "https://httpbin.org/post"; // httpbin supports CORS for testing
+const PING_URL = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png";
+
+const runBtn = document.getElementById('runBtn');
+const resetBtn = document.getElementById('resetBtn');
+const pingVal = document.getElementById('pingVal');
+const dlVal = document.getElementById('dlVal');
+const ulVal = document.getElementById('ulVal');
+const qual = document.getElementById('qual');
+const canvas = document.getElementById('historyCanvas');
+const ctx = canvas.getContext('2d');
+
+let history = [];
+
+function drawHistory(arr){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!arr.length) return;
+  const max = Math.max(...arr);
+  const min = Math.min(...arr);
+  const range = max - min || 1;
+  ctx.beginPath();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#00ccff';
+  arr.forEach((v,i)=>{
+    const x = (i/(arr.length-1))*canvas.width;
+    const y = canvas.height - ((v-min)/range)*canvas.height;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function qualityLabel(dl, ul, ping){
+  if(dl===null) return '—';
+  if(dl >= 100 && ping < 50) return 'Excellent';
+  if(dl >= 25) return 'Good';
+  if(dl >= 5) return 'Ok';
+  return 'Poor';
+}
+
+async function measurePing(iter=4){
+  try{
+    const times=[];
+    for(let i=0;i<iter;i++){
+      const t0 = performance.now();
+      // use mode:'no-cors' for timing even if response is opaque; works for approximate ping
+      await fetch(PING_URL + '?r=' + Math.random(), {mode:'no-cors', cache:'no-store'});
+      const t1 = performance.now();
+      times.push(t1-t0);
+      await new Promise(r=>setTimeout(r,120));
+    }
+    const avg = Math.round(times.reduce((a,b)=>a+b,0)/times.length);
+    return avg;
+  }catch(e){
+    return null;
+  }
+}
+
+async function measureDownload(){
+  try{
+    const t0 = performance.now();
+    const res = await fetch(DOWNLOAD_URL + '?r=' + Math.random(), {cache:'no-store', mode:'cors'});
+    if(!res.ok) throw new Error('download failed');
+    const buf = await res.arrayBuffer();
+    const t1 = performance.now();
+    const seconds = (t1 - t0)/1000;
+    const bits = buf.byteLength * 8;
+    const mbps = (bits / seconds) / (1024*1024);
+    return +mbps.toFixed(2);
+  }catch(err){
+    console.warn('Download error', err);
+    return null;
+  }
+}
+
+async function measureUpload(sizeMB=2){
+  try{
+    const data = new Uint8Array(sizeMB * 1024 * 1024);
+    for(let i=0;i<data.length;i+=4096) data[i]=i%256;
+    const t0 = performance.now();
+    const res = await fetch(UPLOAD_URL + '?r=' + Math.random(), {method:'POST', body: data, mode:'cors', cache:'no-store'});
+    if(!res.ok) {
+      console.warn('upload responded with', res.status);
+    }
+    const t1 = performance.now();
+    const seconds = (t1 - t0)/1000;
+    const bits = data.length * 8;
+    const mbps = (bits / seconds) / (1024*1024);
+    return +mbps.toFixed(2);
+  }catch(err){
+    console.warn('Upload error', err);
+    return null;
+  }
+}
+
+runBtn.addEventListener('click', async ()=>{
+  runBtn.disabled = true;
+  runBtn.textContent = 'Testing...';
+  pingVal.textContent = '... ms';
+  dlVal.textContent = '... Mbps';
+  ulVal.textContent = '... Mbps';
+  qual.textContent = 'Testing';
+
+  const ping = await measurePing(3);
+  if(ping !== null) pingVal.textContent = ping + ' ms'; else pingVal.textContent = '—';
+
+  const dl = await measureDownload();
+  if(dl !== null){
+    dlVal.textContent = dl + ' Mbps';
+    history.push(dl);
+    if(history.length>20) history.shift();
+    drawHistory(history);
+  } else dlVal.textContent = '—';
+
+  const ul = await measureUpload(2);
+  if(ul !== null) ulVal.textContent = ul + ' Mbps'; else ulVal.textContent = '—';
+
+  qual.textContent = qualityLabel(dl, ul, ping);
+
+  runBtn.disabled = false;
+  runBtn.textContent = 'Run Test';
+});
+
+resetBtn.addEventListener('click', ()=>{
+  pingVal.textContent = '— ms';
+  dlVal.textContent = '— Mbps';
+  ulVal.textContent = '— Mbps';
+  qual.textContent = '—';
+  history = [];
+  drawHistory([]);
+});
+
+</script>
+</body>
+</html>
